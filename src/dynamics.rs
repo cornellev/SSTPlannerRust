@@ -1,3 +1,5 @@
+use crate::params::VehicleParams;
+
 //Used in propogate (which essentially calls this 80 times a second)
 //It moves the car a bit assuming constant curvature and speed
 pub fn arc_pose(x: f32, y: f32, heading: f32, distance: f32, curvature: f32) -> (f32, f32, f32) {
@@ -13,6 +15,15 @@ pub fn arc_pose(x: f32, y: f32, heading: f32, distance: f32, curvature: f32) -> 
         let ny = y - (new_heading.cos() - heading.cos()) / curvature;
         (nx, ny, new_heading)
     }
+}
+
+
+pub fn max_steer_at_speed(speed: f32, p: &VehicleParams) -> f32 {
+    let v2 = speed * speed;
+    if v2 < 1e-6 {
+        return p.max_steer;
+    }
+    p.max_steer.min((p.max_lat_accel * p.wheelbase / v2).atan())
 }
 
 

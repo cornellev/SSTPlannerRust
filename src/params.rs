@@ -7,11 +7,17 @@ pub struct VehicleParams {
     pub max_steer: f32,        // rad
     pub max_steer_rate: f32,   // rad/s
     pub max_lat_accel: f32,    // m/s²
+    pub max_brake:f32 ,
+
 
     // geometry
     pub wheelbase: f32,        // m
     pub footprint_radius: f32, // m, radius of each collision circle
     pub safety_margin: f32,    // m, extra clearance required from obstacles
+    pub footprint_offsets: [f32;3],//Meters of how much the collision circles are ahead rear axle
+    pub plan_dt:f32, //how long each frame is
+    pub check_spacing:f32, //meters (2 times the safety margin)
+
 }
 
 impl Default for VehicleParams {
@@ -26,6 +32,10 @@ impl Default for VehicleParams {
             wheelbase: 0.6,
             footprint_radius: 0.4,
             safety_margin: 0.2,
+            footprint_offsets:[0.1, 0.5, 0.9],
+            plan_dt:1.0/80.0,
+            check_spacing:0.25,
+            max_brake:2.4,
         }
     }
 }
