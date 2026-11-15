@@ -186,7 +186,8 @@ impl DistanceField {
     }
 
 
-    pub fn pose_clear(&self, params: &VehicleParams, x: f32, y: f32, heading: f32) -> bool {
+    pub fn pose_clear(&self, params: &VehicleParams, x: f32, y: f32, heading: f32) -> Option<f32> {
+        let mut minDist:f32 = f32::MAX;
         let (s, c) = heading.sin_cos();                    // getting sin and cos of the ehading to find how body is oriented
         let need = params.footprint_radius + params.safety_margin;
 
@@ -194,12 +195,13 @@ impl DistanceField {
             let cx = x + off * c;
             let cy = y + off * s;
             match self.at(cx, cy) {
-                Some(d) if d > need => {}          // Circle is safe
-                _ => return false,                 // Too close to an obstacle
+                //None means off the map btw
+                Some(d) if d > need => minDist = minDist.min(d-need),          // Circle is safe
+                _ => return None,                 // Too close to an obstacle
         }
+        }
+        Some(minDist)
     }
-    true
-}
 }
 
 

@@ -27,6 +27,19 @@ pub fn max_steer_at_speed(speed: f32, p: &VehicleParams) -> f32 {
 }
 
 
+/// (lowest, highest) acceleration we can do with our car
+pub fn accel_limits(speed: f32, p: &VehicleParams) -> (f32, f32) {
+    const EPS: f32 = 1e-3;
+    if speed > EPS {
+        //Slightly imprecise BC we might break and then accel backwards if that makes sense
+        (-p.max_brake, p.max_accel)
+    } else if speed < -EPS {
+        (-p.max_accel, p.max_brake)
+    } else {
+        (-p.max_accel, p.max_accel)
+    }
+}
+
 //Tests are very clauded but proof read oc
 
 #[cfg(test)]
@@ -54,5 +67,38 @@ mod tests {
     fn full_circle_returns_home() {
         let (x, y, h) = arc_pose(0.0, 0.0, 0.0, 2.0 * PI, 1.0);
         assert!(close(x, 0.0) && close(y, 0.0) && close(h, 2.0 * PI));
+    }
+
+    #[test]
+    fn accel_limits_moving_forward() {
+        let p = VehicleParams::default();
+        let (lo, hi) = accel_limits(1.0, &p);
+        assert_eq!(lo, -p.max_brake); // negative accel brakes when moving forward
+        assert_eq!(hi, p.max_accel);
+    }
+
+    #[test]
+    fn accel_limits_while_reversing() {
+        let p = VehicleParams::default();
+        let (lo, hi) = accel_limits(-1.0, &p);
+        assert_eq!(lo, -p.max_accel);
+        assert_eq!(hi, p.max_brake); // positive accel brakes when reversing
+    }
+
+    #[test]
+    fn accel_limits_at_rest_are_symmetric() {
+        let p = VehicleParams::default();
+        let (lo, hi) = accel_limits(0.0, &p);
+        assert_eq!(lo, -p.max_accel);
+        assert_eq!(hi, p.max_accel);
+    }
+
+    #[test]
+    fn accel_limits_mirror_between_forward_and_reverse() {
+        let p = VehicleParams::default();
+        let (lo_f, hi_f) = accel_limits(0.8, &p);
+        let (lo_r, hi_r) = accel_limits(-0.8, &p);
+        assert_eq!(lo_f, -hi_r);
+        assert_eq!(hi_f, -lo_r);
     }
 }

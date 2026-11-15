@@ -17,6 +17,7 @@ pub struct VehicleParams {
     pub footprint_offsets: [f32;3],//Meters of how much the collision circles are ahead rear axle
     pub plan_dt:f32, //how long each frame is
     pub check_spacing:f32, //meters (2 times the safety margin)
+    pub cell_error: f32,   // m, worst-case error of a nearest-cell SDF lookup
 
 }
 
@@ -35,6 +36,7 @@ impl Default for VehicleParams {
             footprint_offsets:[0.1, 0.5, 0.9],
             plan_dt:1.0/80.0,
             check_spacing:0.25,
+            cell_error: 0.07,
             max_brake:2.4,
         }
     }
